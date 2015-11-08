@@ -23,6 +23,10 @@ import org.jasig.cas.client.util.ReflectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Base class to provide most of the boiler-plate code (i.e. checking for proper values, returning defaults, etc.
  *
@@ -70,6 +74,38 @@ public abstract class BaseConfigurationStrategy implements ConfigurationStrategy
             public Class<? extends T> parse(final String value) {
                 try {
                     return ReflectUtils.loadClass(value);
+                } catch (final IllegalArgumentException e) {
+                    return configurationKey.getDefaultValue();
+                }
+            }
+        });
+    }
+
+    public <T> Collection<? extends T> getCollection(final ConfigurationKey<Collection<? extends T>> configurationKey) {
+        return getValue(configurationKey, new Parser<Collection<? extends T>>() {
+            public Collection<? extends T> parse(final String value) {
+                try {
+                    final String[] values = value.split(",");
+                    final Set<T> collection = new HashSet<T>();
+                    for (final String singleValue : values) {
+                        Object objValue = CommonUtils.parseDouble(singleValue);
+                        if (objValue != null) {
+                            collection.add((T) objValue);
+                            continue;
+                        }
+                        objValue = CommonUtils.parseLong(singleValue);
+                        if (objValue != null) {
+                            collection.add((T) objValue);
+                            continue;
+                        }
+                        objValue = CommonUtils.parseClass(singleValue);
+                        if (objValue != null) {
+                            collection.add((T) objValue);
+                            continue;
+                        }
+                        collection.add((T) singleValue);
+                    }
+                    return collection;
                 } catch (final IllegalArgumentException e) {
                     return configurationKey.getDefaultValue();
                 }

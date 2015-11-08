@@ -28,6 +28,8 @@ import org.jasig.cas.client.configuration.ConfigurationStrategyName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+
 /**
  * Abstracts out the ability to configure the filters from the initial properties provided.
  *
@@ -45,7 +47,7 @@ public abstract class AbstractConfigurationFilter implements Filter {
 
     private ConfigurationStrategy configurationStrategy;
 
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(final FilterConfig filterConfig) throws ServletException {
         final String configurationStrategyName = filterConfig.getServletContext().getInitParameter(CONFIGURATION_STRATEGY_KEY);
         this.configurationStrategy = ReflectUtils.newInstance(ConfigurationStrategyName.resolveToConfigurationStrategy(configurationStrategyName));
         this.configurationStrategy.init(filterConfig, getClass());
@@ -69,6 +71,10 @@ public abstract class AbstractConfigurationFilter implements Filter {
 
     protected final <T> Class<? extends T> getClass(final ConfigurationKey<Class<? extends T>> configurationKey) {
         return this.configurationStrategy.getClass(configurationKey);
+    }
+
+    protected final <T> Collection<?> getCollection(final ConfigurationKey<Collection<?>> configurationKey) {
+        return this.configurationStrategy.getCollection(configurationKey);
     }
 
     public final void setIgnoreInitConfiguration(final boolean ignoreInitConfiguration) {

@@ -20,6 +20,9 @@ package org.jasig.cas.client.validation;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 import javax.net.ssl.HostnameVerifier;
 import javax.servlet.*;
@@ -27,6 +30,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jasig.cas.client.Protocol;
+import org.jasig.cas.client.authentication.GatewayResolver;
+import org.jasig.cas.client.configuration.ConfigurationKey;
 import org.jasig.cas.client.configuration.ConfigurationKeys;
 import org.jasig.cas.client.util.AbstractCasFilter;
 import org.jasig.cas.client.util.CommonUtils;
@@ -51,6 +56,9 @@ import org.jasig.cas.client.util.ReflectUtils;
  * @since 3.1
  */
 public abstract class AbstractTicketValidationFilter extends AbstractCasFilter {
+
+    /** Assertion validator instance. Default is to do nothing. */
+    private List<AssertionValidator> assertionValidators = new ArrayList<AssertionValidator>();
 
     /** The TicketValidator we will use to validate tickets. */
     private TicketValidator ticketValidator;
@@ -138,6 +146,16 @@ public abstract class AbstractTicketValidationFilter extends AbstractCasFilter {
         }
 
         setTicketValidator(getTicketValidator(filterConfig));
+        final ConfigurationKey key = ConfigurationKeys.ASSERTION_VALIDATOR_CLASS;
+        final Collection<Class<? extends AssertionValidator>> assertionValidatorClasses = getCollection(key);
+
+        for (final Class<? extends AssertionValidator> assertionValidatorClass : assertionValidatorClasses) {
+             this.
+        }
+        if (assertionValidatorClass != null) {
+
+        }
+
         super.initInternal(filterConfig);
     }
 
@@ -166,8 +184,8 @@ public abstract class AbstractTicketValidationFilter extends AbstractCasFilter {
      * if ticket validation succeeds.  This method is called after all ValidationFilter processing required for a successful authentication
      * occurs.
      *
-     * @param request the HttpServletRequest.
-     * @param response the HttpServletResponse.
+     * @param request   the HttpServletRequest.
+     * @param response  the HttpServletResponse.
      * @param assertion the successful Assertion from the server.
      */
     protected void onSuccessfulValidation(final HttpServletRequest request, final HttpServletResponse response,
@@ -203,6 +221,11 @@ public abstract class AbstractTicketValidationFilter extends AbstractCasFilter {
             try {
                 final Assertion assertion = this.ticketValidator.validate(ticket,
                         constructServiceUrl(request, response));
+
+                if (this.assertionValidator != null) {
+                    logger.debug("Validating assertion via {}", this.assertionValidator);
+                    this.assertionValidator.validate(assertion);
+                }
 
                 logger.debug("Successfully authenticated user: {}", assertion.getPrincipal().getName());
 
@@ -251,5 +274,9 @@ public abstract class AbstractTicketValidationFilter extends AbstractCasFilter {
 
     public final void setUseSession(final boolean useSession) {
         this.useSession = useSession;
+    }
+
+    public void setAssertionValidators(final List<AssertionValidator> assertionValidators) {
+        this.assertionValidators = assertionValidators;
     }
 }

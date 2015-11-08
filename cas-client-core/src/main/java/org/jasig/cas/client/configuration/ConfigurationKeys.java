@@ -24,9 +24,11 @@ import org.jasig.cas.client.authentication.DefaultGatewayResolverImpl;
 import org.jasig.cas.client.authentication.GatewayResolver;
 import org.jasig.cas.client.proxy.ProxyGrantingTicketStorage;
 import org.jasig.cas.client.proxy.ProxyGrantingTicketStorageImpl;
+import org.jasig.cas.client.validation.AssertionValidator;
 import org.jasig.cas.client.validation.Cas20ServiceTicketValidator;
 
 import javax.net.ssl.HostnameVerifier;
+import java.util.Collection;
 
 /**
  * Holder interface for all known configuration keys.
@@ -51,6 +53,7 @@ public interface ConfigurationKeys {
     ConfigurationKey<Boolean> GATEWAY = new ConfigurationKey<Boolean>("gateway", Boolean.FALSE);
     ConfigurationKey<Class<? extends AuthenticationRedirectStrategy>> AUTHENTICATION_REDIRECT_STRATEGY_CLASS = new ConfigurationKey<Class<? extends AuthenticationRedirectStrategy>>("authenticationRedirectStrategyClass", null);
     ConfigurationKey<Class<? extends GatewayResolver>> GATEWAY_STORAGE_CLASS = new ConfigurationKey<Class<? extends GatewayResolver>>("gatewayStorageClass", DefaultGatewayResolverImpl.class);
+    ConfigurationKey<Collection<Class<? extends AssertionValidator>>> ASSERTION_VALIDATOR_CLASS = new ConfigurationKey<Collection<Class<? extends AssertionValidator>>>("assertionValidatorClasses");
     ConfigurationKey<String> CAS_SERVER_URL_PREFIX = new ConfigurationKey<String>("casServerUrlPrefix", null);
     ConfigurationKey<String> ENCODING = new ConfigurationKey<String>("encoding", null);
     ConfigurationKey<Long> TOLERANCE = new ConfigurationKey<Long>("tolerance", 1000L);

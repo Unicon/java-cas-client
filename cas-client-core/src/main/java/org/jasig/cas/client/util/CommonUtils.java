@@ -201,6 +201,30 @@ public final class CommonUtils {
         }
     }
 
+    public static Double parseDouble(final String value) {
+        try {
+            return Double.parseDouble(value);
+        } catch (final Exception e) {
+            return null;
+        }
+    }
+
+    public static Long parseLong(final String value) {
+        try {
+            return Long.parseLong(value);
+        } catch (final Exception e) {
+            return null;
+        }
+    }
+
+    public static Class parseClass(final String value) {
+        try {
+            return Class.forName(value);
+        } catch (final Exception e) {
+            return null;
+        }
+    }
+
     public static void readAndRespondToProxyReceptorRequest(final HttpServletRequest request,
             final HttpServletResponse response, final ProxyGrantingTicketStorage proxyGrantingTicketStorage)
             throws IOException {
