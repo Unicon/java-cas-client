@@ -63,6 +63,8 @@ public interface ConfigurationKeys {
     ConfigurationKey<Boolean> DISABLE_XML_SCHEMA_VALIDATION = new ConfigurationKey<Boolean>("disableXmlSchemaValidation", Boolean.FALSE);
     ConfigurationKey<String> IGNORE_PATTERN = new ConfigurationKey<String>("ignorePattern", null);
     ConfigurationKey<String> IGNORE_URL_PATTERN_TYPE = new ConfigurationKey<String>("ignoreUrlPatternType", "REGEX");
+    ConfigurationKey<String> INCLUDE_PATTERN = new ConfigurationKey<String>("includePattern", null);
+    ConfigurationKey<String> INCLUDE_URL_PATTERN_TYPE = new ConfigurationKey<String>("includeUrlPatternType", "REGEX");
     ConfigurationKey<Class<? extends HostnameVerifier>> HOSTNAME_VERIFIER = new ConfigurationKey<Class<? extends HostnameVerifier>>("hostnameVerifier", null);
     ConfigurationKey<String> HOSTNAME_VERIFIER_CONFIG = new ConfigurationKey<String>("hostnameVerifierConfig", null);
     ConfigurationKey<Boolean> EXCEPTION_ON_VALIDATION_FAILURE = new ConfigurationKey<Boolean>("exceptionOnValidationFailure", Boolean.TRUE);

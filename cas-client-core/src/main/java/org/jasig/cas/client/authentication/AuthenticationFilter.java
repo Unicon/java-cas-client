@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.jasig.cas.client.Protocol;
+import org.jasig.cas.client.configuration.ConfigurationKey;
 import org.jasig.cas.client.configuration.ConfigurationKeys;
 import org.jasig.cas.client.util.AbstractCasFilter;
 import org.jasig.cas.client.util.CommonUtils;
@@ -72,7 +73,9 @@ public class AuthenticationFilter extends AbstractCasFilter {
     private AuthenticationRedirectStrategy authenticationRedirectStrategy = new DefaultAuthenticationRedirectStrategy();
     
     private UrlPatternMatcherStrategy ignoreUrlPatternMatcherStrategyClass = null;
-    
+
+    private UrlPatternMatcherStrategy includeUrlPatternMatcherStrategyClass = null;
+
     private static final Map<String, Class<? extends UrlPatternMatcherStrategy>> PATTERN_MATCHER_TYPES =
             new HashMap<String, Class<? extends UrlPatternMatcherStrategy>>();
     
@@ -96,26 +99,12 @@ public class AuthenticationFilter extends AbstractCasFilter {
             setCasServerLoginUrl(getString(ConfigurationKeys.CAS_SERVER_LOGIN_URL));
             setRenew(getBoolean(ConfigurationKeys.RENEW));
             setGateway(getBoolean(ConfigurationKeys.GATEWAY));
-                       
-            final String ignorePattern = getString(ConfigurationKeys.IGNORE_PATTERN);
-            final String ignoreUrlPatternType = getString(ConfigurationKeys.IGNORE_URL_PATTERN_TYPE);
-            
-            if (ignorePattern != null) {
-                final Class<? extends UrlPatternMatcherStrategy> ignoreUrlMatcherClass = PATTERN_MATCHER_TYPES.get(ignoreUrlPatternType);
-                if (ignoreUrlMatcherClass != null) {
-                    this.ignoreUrlPatternMatcherStrategyClass = ReflectUtils.newInstance(ignoreUrlMatcherClass.getName());
-                } else {
-                    try {
-                        logger.trace("Assuming {} is a qualified class name...", ignoreUrlPatternType);
-                        this.ignoreUrlPatternMatcherStrategyClass = ReflectUtils.newInstance(ignoreUrlPatternType);
-                    } catch (final IllegalArgumentException e) {
-                        logger.error("Could not instantiate class [{}]", ignoreUrlPatternType, e);
-                    }
-                }
-                if (this.ignoreUrlPatternMatcherStrategyClass != null) {
-                    this.ignoreUrlPatternMatcherStrategyClass.setPattern(ignorePattern);
-                }
-            }
+
+            configureUrlPatternMatchers(ConfigurationKeys.IGNORE_PATTERN, ConfigurationKeys.IGNORE_URL_PATTERN_TYPE, 
+                                        this.ignoreUrlPatternMatcherStrategyClass);
+
+            configureUrlPatternMatchers(ConfigurationKeys.INCLUDE_PATTERN, ConfigurationKeys.INCLUDE_URL_PATTERN_TYPE,
+                    this.includeUrlPatternMatcherStrategyClass);
             
             final Class<? extends GatewayResolver> gatewayStorageClass = getClass(ConfigurationKeys.GATEWAY_STORAGE_CLASS);
 
@@ -199,7 +188,30 @@ public class AuthenticationFilter extends AbstractCasFilter {
     public final void setGatewayStorage(final GatewayResolver gatewayStorage) {
         this.gatewayStorage = gatewayStorage;
     }
-        
+      
+    private void configureUrlPatternMatchers(final ConfigurationKey<String> keyName, 
+                                             final ConfigurationKey<String> patternTypeKeyName,
+                                             final UrlPatternMatcherStrategy urlPatternMatcherStrategy) {
+        final String pattern = getString(keyName);
+        final String patternType = getString(patternTypeKeyName);
+
+        if (pattern != null) {
+            final Class<? extends UrlPatternMatcherStrategy> ignoreUrlMatcherClass = PATTERN_MATCHER_TYPES.get(patternType);
+            if (ignoreUrlMatcherClass != null) {
+                this.ignoreUrlPatternMatcherStrategyClass = ReflectUtils.newInstance(ignoreUrlMatcherClass.getName());
+            } else {
+                try {
+                    logger.trace("Assuming {} is a qualified class name...", patternType);
+                    this.ignoreUrlPatternMatcherStrategyClass = ReflectUtils.newInstance(patternType);
+                } catch (final IllegalArgumentException e) {
+                    logger.error("Could not instantiate class [{}]", patternType, e);
+                }
+            }
+            if (urlPatternMatcherStrategy != null) {
+                urlPatternMatcherStrategy.setPattern(pattern);
+            }
+        }
+    }
     private boolean isRequestUrlExcluded(final HttpServletRequest request) {
         if (this.ignoreUrlPatternMatcherStrategyClass == null) {
             return false;
