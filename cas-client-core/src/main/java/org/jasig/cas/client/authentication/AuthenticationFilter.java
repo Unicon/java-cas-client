@@ -136,6 +136,12 @@ public class AuthenticationFilter extends AbstractCasFilter {
             filterChain.doFilter(request, response);
             return;
         }
+
+        if (!isRequestUrlIncluded(request)) {
+            logger.debug("Request is not included.");
+            filterChain.doFilter(request, response);
+            return;
+        }
         
         final HttpSession session = request.getSession(false);
         final Assertion assertion = session != null ? (Assertion) session.getAttribute(CONST_CAS_ASSERTION) : null;
@@ -212,6 +218,20 @@ public class AuthenticationFilter extends AbstractCasFilter {
             }
         }
     }
+
+    private boolean isRequestUrlIncluded(final HttpServletRequest request) {
+        if (this.includeUrlPatternMatcherStrategyClass == null) {
+            return true;
+        }
+
+        final StringBuffer urlBuffer = request.getRequestURL();
+        if (request.getQueryString() != null) {
+            urlBuffer.append("?").append(request.getQueryString());
+        }
+        final String requestUri = urlBuffer.toString();
+        return this.includeUrlPatternMatcherStrategyClass.matches(requestUri);
+    }
+    
     private boolean isRequestUrlExcluded(final HttpServletRequest request) {
         if (this.ignoreUrlPatternMatcherStrategyClass == null) {
             return false;
